@@ -1,0 +1,102 @@
+﻿@model TourBookingWeb.Models.Booking
+@{
+    ViewData["Title"] = "Đặt tour: " + Model.Tour?.Title;
+}
+<div class="container-fluid p-0 mb-5">
+    <div class="hero-header d-flex align-items-center justify-content-center" style="height:100px;background-color:var(--primary);"></div>
+</div>
+
+<section class="container my-5">
+    <div class="row mb-4">
+        <div class="col-md-5">
+            <img src="~/@Model.Tour.Images.FirstOrDefault(i => i.DayNumber == 0)?.Url" class="img-fluid rounded shadow-sm" alt="Ảnh đại diện">
+        </div>
+        <div class="col-md-7">
+            <h3>@Model.Tour.Title</h3>
+            <p>@Model.Tour.Description</p>
+            <ul>
+                <li><strong>Mã tour:</strong> @Model.Tour.TourId</li>
+                <li><strong>Thời gian:</strong> @Model.Tour.Duration</li>
+                <li><strong>Giá người lớn:</strong> @Model.Tour.AdultPrice.ToString("n0") đ</li>
+                <li><strong>Điểm đến:</strong> @Model.Tour.Destination</li>
+                <li><strong>Phương tiện:</strong> @Model.Tour.Transport</li>
+            </ul>
+        </div>
+    </div>
+
+    <h4 class="mb-3"><i class="fa fa-tags"></i> BẢNG GIÁ TOUR CHI TIẾT</h4>
+    <table class="table table-bordered mb-5">
+        <thead>
+            <tr><th>Đối tượng</th><th>Giá</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Người lớn</td><td>@Model.Tour.AdultPrice.ToString("n0") đ</td></tr>
+            <tr><td>Trẻ em</td><td>@Model.Tour.ChildPrice.ToString("n0") đ</td></tr>
+        </tbody>
+    </table>
+
+    <form asp-action="Create" method="post" class="border rounded p-4 shadow-sm">
+        <input type="hidden" name="TourId" value="@Model.TourId" />
+        <input type="hidden" name="DepartureDate" value="@Model.DepartureDate.ToString("yyyy-MM-dd")" />
+
+        <h4 class="mb-3"><i class="fa fa-info-circle"></i> THÔNG TIN LIÊN HỆ</h4>
+        <div class="row mb-3">
+            <div class="col-md-6"><label>Họ tên *</label><input type="text" name="FullName" class="form-control" required /></div>
+            <div class="col-md-6"><label>Email *</label><input type="email" name="Email" class="form-control" required /></div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6"><label>Điện thoại *</label><input type="text" name="Phone" class="form-control" required /></div>
+            <div class="col-md-6"><label>Địa chỉ *</label><input type="text" name="Address" class="form-control" required /></div>
+        </div>
+        <div class="mb-3"><label>Yêu cầu đặc biệt</label><textarea name="SpecialRequest" class="form-control"></textarea></div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label>Số người lớn *</label>
+                <input type="number" name="AdultQuantity" id="AdultQuantity" class="form-control" required min="1" value="1" />
+            </div>
+            <div class="col-md-6">
+                <label>Số trẻ em</label>
+                <input type="number" name="ChildQuantity" id="ChildQuantity" class="form-control" min="0" value="0" />
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Tổng tiền dự kiến</label>
+            <input type="text" id="totalPriceDisplay" class="form-control bg-light" readonly />
+        </div>
+
+        <h4 class="mb-3"><i class="fa fa-plane-departure"></i> NGÀY KHỞI HÀNH</h4>
+        <div class="mb-3">
+            <label>Ngày khởi hành bạn chọn:</label>
+            <input type="text" class="form-control" value="@Model.DepartureDate.ToString("dd/MM/yyyy")" readonly />
+            <input type="hidden" name="DepartureDate" value="@Model.DepartureDate.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <h4 class="mb-3"><i class="fa fa-credit-card"></i> PHƯƠNG THỨC THANH TOÁN</h4>
+        <div class="form-check"><input class="form-check-input" type="radio" name="PaymentMethod" value="Quầy" checked /><label class="form-check-label">Thanh toán tại quầy</label></div>
+        <div class="form-check"><input class="form-check-input" type="radio" name="PaymentMethod" value="MoMo" /><label class="form-check-label">Ví MoMo</label></div>
+        <div class="form-check"><input class="form-check-input" type="radio" name="PaymentMethod" value="VNPAY" /><label class="form-check-label">VNPAY</label></div>
+
+        <button type="submit" class="btn btn-success mt-4">Hoàn tất đặt tour</button>
+    </form>
+</section>
+
+@section Scripts {
+    <script>
+        const adultPrice = parseFloat('@ViewBag.AdultPrice') || 0;
+        const childPrice = parseFloat('@ViewBag.ChildPrice') || 0;
+
+        function calculateTotal() {
+            const adults = parseInt(document.getElementById("AdultQuantity").value) || 0;
+            const children = parseInt(document.getElementById("ChildQuantity").value) || 0;
+            const total = (adults * adultPrice) + (children * childPrice);
+            document.getElementById("totalPriceDisplay").value = total.toLocaleString('vi-VN') + ' đ';
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("AdultQuantity").addEventListener("input", calculateTotal);
+            document.getElementById("ChildQuantity").addEventListener("input", calculateTotal);
+            calculateTotal();
+        });
+    </script>
+}
